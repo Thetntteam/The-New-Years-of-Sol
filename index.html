@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Solar New Year — Planetary Countdowns</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;900&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --void: #020408;
+    --deep: #060d18;
+    --panel: rgba(255,255,255,0.04);
+    --panel-border: rgba(255,255,255,0.08);
+    --text: #e8edf5;
+    --muted: rgba(232,237,245,0.45);
+    --dim: rgba(232,237,245,0.2);
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--void);
+    color: var(--text);
+    font-family: 'Space Mono', monospace;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Starfield */
+  #stars {
+    position: fixed; inset: 0; pointer-events: none; z-index: 0;
+    background:
+      radial-gradient(1px 1px at 10% 15%, rgba(255,255,255,0.9) 0%, transparent 100%),
+      radial-gradient(1px 1px at 23% 67%, rgba(255,255,255,0.7) 0%, transparent 100%),
+      radial-gradient(1.5px 1.5px at 45% 8%, rgba(255,255,255,0.8) 0%, transparent 100%),
+      radial-gradient(1px 1px at 67% 34%, rgba(255,255,255,0.6) 0%, transparent 100%),
+      radial-gradient(1px 1px at 78% 89%, rgba(255,255,255,0.9) 0%, transparent 100%),
+      radial-gradient(1px 1px at 92% 22%, rgba(255,255,255,0.7) 0%, transparent 100%),
+      radial-gradient(1.5px 1.5px at 5% 92%, rgba(255,255,255,0.8) 0%, transparent 100%),
+      radial-gradient(1px 1px at 34% 45%, rgba(255,255,255,0.5) 0%, transparent 100%),
+      radial-gradient(1px 1px at 56% 78%, rgba(255,255,255,0.7) 0%, transparent 100%),
+      radial-gradient(1px 1px at 15% 38%, rgba(255,255,255,0.6) 0%, transparent 100%),
+      radial-gradient(1px 1px at 82% 55%, rgba(255,255,255,0.8) 0%, transparent 100%),
+      radial-gradient(1.5px 1.5px at 70% 12%, rgba(255,255,255,0.9) 0%, transparent 100%),
+      radial-gradient(1px 1px at 38% 95%, rgba(255,255,255,0.6) 0%, transparent 100%),
+      radial-gradient(1px 1px at 90% 70%, rgba(255,255,255,0.7) 0%, transparent 100%),
+      radial-gradient(1px 1px at 28% 25%, rgba(255,255,255,0.5) 0%, transparent 100%),
+      radial-gradient(1px 1px at 62% 50%, rgba(255,255,255,0.4) 0%, transparent 100%),
+      radial-gradient(1px 1px at 18% 55%, rgba(255,255,255,0.6) 0%, transparent 100%),
+      radial-gradient(1px 1px at 48% 30%, rgba(255,255,255,0.7) 0%, transparent 100%),
+      radial-gradient(1.5px 1.5px at 85% 40%, rgba(255,255,255,0.8) 0%, transparent 100%),
+      radial-gradient(1px 1px at 72% 62%, rgba(255,255,255,0.5) 0%, transparent 100%),
+      var(--void);
+  }
+
+  /* Header */
+  header {
+    position: relative; z-index: 10;
+    text-align: center;
+    padding: 4rem 2rem 2rem;
+  }
+
+  .sun-glow {
+    width: 80px; height: 80px;
+    margin: 0 auto 1.5rem;
+    border-radius: 50%;
+    background: radial-gradient(circle, #fff8e0 0%, #ffd060 40%, #ff8800 70%, rgba(255,120,0,0.2) 100%);
+    box-shadow: 0 0 40px 12px rgba(255,180,0,0.35), 0 0 80px 30px rgba(255,120,0,0.15);
+    animation: pulse 4s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { box-shadow: 0 0 40px 12px rgba(255,180,0,0.35), 0 0 80px 30px rgba(255,120,0,0.15); }
+    50% { box-shadow: 0 0 60px 20px rgba(255,180,0,0.5), 0 0 120px 50px rgba(255,120,0,0.25); }
+  }
+
+  h1 {
+    font-family: 'Orbitron', sans-serif;
+    font-size: clamp(1.6rem, 4vw, 2.8rem);
+    font-weight: 900;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: #fff;
+    text-shadow: 0 0 30px rgba(255,200,80,0.4);
+  }
+
+  .subtitle {
+    margin-top: 0.75rem;
+    font-size: 0.75rem;
+    letter-spacing: 0.2em;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+
+  .earth-date {
+    display: inline-block;
+    margin-top: 1.5rem;
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    color: var(--dim);
+    border: 1px solid var(--panel-border);
+    padding: 0.4rem 1rem;
+    border-radius: 2px;
+  }
+
+  /* Section headers */
+  .section-title {
+    position: relative; z-index: 10;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.65rem;
+    letter-spacing: 0.4em;
+    text-transform: uppercase;
+    color: var(--dim);
+    text-align: center;
+    padding: 3rem 2rem 1.5rem;
+  }
+
+  .section-title::before, .section-title::after {
+    content: '—— ';
+  }
+
+  /* Grid */
+  .grid {
+    position: relative; z-index: 10;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1px;
+    padding: 0 1px;
+    max-width: 1400px;
+    margin: 0 auto;
+    border: 1px solid var(--panel-border);
+  }
+
+  .extras-grid {
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  }
+
+  /* Planet card */
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--panel-border);
+    padding: 1.8rem 1.5rem;
+    position: relative;
+    overflow: hidden;
+    transition: background 0.3s;
+  }
+
+  .card:hover { background: rgba(255,255,255,0.07); }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--planet-color, rgba(255,255,255,0.15));
+    opacity: 0.6;
+  }
+
+  .card-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.2rem;
+  }
+
+  .planet-orb {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    background: var(--planet-bg, rgba(255,255,255,0.2));
+    box-shadow: 0 0 12px 3px var(--planet-glow, rgba(255,255,255,0.1));
+    position: relative;
+  }
+
+  /* Ring for Saturn / Uranus */
+  .has-ring::after {
+    content: '';
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%) rotateX(70deg);
+    width: 52px; height: 52px;
+    border-radius: 50%;
+    border: 5px solid var(--ring-color, rgba(200,180,120,0.5));
+    pointer-events: none;
+  }
+
+  .planet-name {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    color: #fff;
+  }
+
+  .planet-year-length {
+    font-size: 0.6rem;
+    letter-spacing: 0.12em;
+    color: var(--muted);
+    margin-top: 0.25rem;
+    text-transform: uppercase;
+  }
+
+  /* Countdown display */
+  .countdown {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+    margin-bottom: 1rem;
+  }
+
+  .cd-unit {
+    text-align: center;
+  }
+
+  .cd-num {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: var(--planet-accent, #fff);
+    display: block;
+    line-height: 1;
+  }
+
+  .cd-label {
+    font-size: 0.52rem;
+    letter-spacing: 0.15em;
+    color: var(--dim);
+    text-transform: uppercase;
+    margin-top: 4px;
+    display: block;
+  }
+
+  .progress-bar {
+    height: 2px;
+    background: var(--panel-border);
+    border-radius: 1px;
+    overflow: hidden;
+    margin-bottom: 0.8rem;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: var(--planet-color, rgba(255,255,255,0.4));
+    border-radius: 1px;
+    transition: width 1s linear;
+  }
+
+  .next-year-label {
+    font-size: 0.6rem;
+    color: var(--dim);
+    letter-spacing: 0.1em;
+  }
+
+  /* Extras section */
+  .extras-label {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.5rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--muted);
+    position: absolute;
+    top: 0.8rem; right: 0.8rem;
+    background: rgba(255,255,255,0.06);
+    padding: 2px 6px;
+    border: 1px solid var(--panel-border);
+  }
+
+  footer {
+    position: relative; z-index: 10;
+    text-align: center;
+    padding: 3rem 2rem;
+    font-size: 0.6rem;
+    letter-spacing: 0.15em;
+    color: var(--dim);
+    text-transform: uppercase;
+  }
+
+  .live-dot {
+    display: inline-block;
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: #4cff8a;
+    animation: blink 2s ease-in-out infinite;
+    vertical-align: middle;
+    margin-right: 6px;
+  }
+
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.2; }
+  }
+</style>
+</head>
+<body>
+
+<div id="stars"></div>
+
+<header>
+  <div class="sun-glow"></div>
+  <h1>Solar New Year</h1>
+  <div class="subtitle">Planetary Orbital Countdowns</div>
+  <div class="earth-date" id="earth-date">Loading...</div>
+</header>
+
+<div class="section-title">The Eight Planets</div>
+<div class="grid" id="planet-grid"></div>
+
+<div class="section-title">The Extended Family — Dwarf Planets &amp; Notable Objects</div>
+<div class="grid extras-grid" id="extras-grid"></div>
+
+<footer>
+  <span class="live-dot"></span>
+  Live countdowns — updating every second &nbsp;·&nbsp; All years calculated from each body's orbital period around the Sun &nbsp;·&nbsp; Year 1 reference: J2000.0 epoch (Jan 1, 2000, 12:00 TT)
+</footer>
+
+<script>
+// Orbital data — sidereal period in Earth days, color theme, and year reference
+// "New Year" = when the planet completes one full orbit since J2000.0 epoch
+const PLANETS = [
+  {
+    name: "Mercury", yearDays: 87.9691,
+    fact: "87.97 Earth days / orbit",
+    color: "#b5b0a8", glow: "rgba(181,176,168,0.3)", bg: "radial-gradient(circle at 35% 35%, #d4cfc7, #7a7570)",
+    accent: "#d4cfc7"
+  },
+  {
+    name: "Venus", yearDays: 224.701,
+    fact: "224.70 Earth days / orbit",
+    color: "#f0c060", glow: "rgba(240,192,96,0.35)", bg: "radial-gradient(circle at 35% 35%, #f5d888, #c07820)",
+    accent: "#f5d888"
+  },
+  {
+    name: "Earth", yearDays: 365.25636,
+    fact: "365.26 Earth days / orbit",
+    color: "#4fa8e8", glow: "rgba(79,168,232,0.35)", bg: "radial-gradient(circle at 35% 35%, #6fc8f8, #1a5ca0)",
+    accent: "#6fc8f8"
+  },
+  {
+    name: "Mars", yearDays: 686.971,
+    fact: "686.97 Earth days / orbit",
+    color: "#d4664a", glow: "rgba(212,102,74,0.35)", bg: "radial-gradient(circle at 35% 35%, #e08060, #8a2a10)",
+    accent: "#e08060"
+  },
+  {
+    name: "Jupiter", yearDays: 4332.59,
+    fact: "4,332.59 Earth days / orbit",
+    color: "#c8a070", glow: "rgba(200,160,112,0.35)", bg: "radial-gradient(circle at 35% 35%, #d8b888, #8a5820)",
+    accent: "#d8b888"
+  },
+  {
+    name: "Saturn", yearDays: 10759.22,
+    fact: "10,759.22 Earth days / orbit",
+    color: "#e0c888", glow: "rgba(224,200,136,0.3)", bg: "radial-gradient(circle at 35% 35%, #edd898, #a87820)",
+    accent: "#edd898", ring: true, ringColor: "rgba(200,180,100,0.5)"
+  },
+  {
+    name: "Uranus", yearDays: 30688.5,
+    fact: "30,688.5 Earth days / orbit",
+    color: "#80d8e8", glow: "rgba(128,216,232,0.35)", bg: "radial-gradient(circle at 35% 35%, #a8e8f0, #2888a0)",
+    accent: "#a8e8f0", ring: true, ringColor: "rgba(128,216,232,0.35)"
+  },
+  {
+    name: "Neptune", yearDays: 60195.0,
+    fact: "60,195 Earth days / orbit",
+    color: "#4878d8", glow: "rgba(72,120,216,0.4)", bg: "radial-gradient(circle at 35% 35%, #6898e8, #1828a0)",
+    accent: "#88a8f0"
+  }
+];
+
+const EXTRAS = [
+  {
+    name: "Pluto", yearDays: 90560.0,
+    fact: "90,560 Earth days / orbit",
+    color: "#a08878", glow: "rgba(160,136,120,0.3)", bg: "radial-gradient(circle at 35% 35%, #c0a898, #604838)",
+    accent: "#c0a898", type: "Dwarf Planet"
+  },
+  {
+    name: "Ceres", yearDays: 1681.63,
+    fact: "1,681.63 Earth days / orbit",
+    color: "#989088", glow: "rgba(152,144,136,0.3)", bg: "radial-gradient(circle at 35% 35%, #b8b0a8, #585048)",
+    accent: "#b8b0a8", type: "Dwarf Planet"
+  },
+  {
+    name: "Eris", yearDays: 203830.0,
+    fact: "203,830 Earth days / orbit",
+    color: "#d0c8c8", glow: "rgba(208,200,200,0.25)", bg: "radial-gradient(circle at 35% 35%, #e8e0e0, #908080)",
+    accent: "#e8e0e0", type: "Dwarf Planet"
+  },
+  {
+    name: "Makemake", yearDays: 111845.0,
+    fact: "111,845 Earth days / orbit",
+    color: "#c88858", glow: "rgba(200,136,88,0.3)", bg: "radial-gradient(circle at 35% 35%, #d8a878, #784820)",
+    accent: "#d8a878", type: "Dwarf Planet"
+  },
+  {
+    name: "Haumea", yearDays: 103774.0,
+    fact: "103,774 Earth days / orbit",
+    color: "#90a8c8", glow: "rgba(144,168,200,0.3)", bg: "radial-gradient(circle at 35% 35%, #a8c0d8, #305878)",
+    accent: "#a8c0d8", type: "Dwarf Planet"
+  },
+  {
+    name: "Sedna", yearDays: 4161000.0,
+    fact: "~11,390 Earth years / orbit",
+    color: "#d86858", glow: "rgba(216,104,88,0.3)", bg: "radial-gradient(circle at 35% 35%, #e88878, #881818)",
+    accent: "#e88878", type: "Scattered Disc Object"
+  },
+  {
+    name: "Halley's Comet", yearDays: 27376.0,
+    fact: "~74.9 Earth years / orbit",
+    color: "#a0d0f0", glow: "rgba(160,208,240,0.35)", bg: "radial-gradient(circle at 35% 35%, #c0e8ff, #305878)",
+    accent: "#c0e8ff", type: "Short-Period Comet"
+  },
+  {
+    name: "Apophis", yearDays: 323.6,
+    fact: "323.6 Earth days / orbit",
+    color: "#88c870", glow: "rgba(136,200,112,0.3)", bg: "radial-gradient(circle at 35% 35%, #a8e090, #285018)",
+    accent: "#a8e090", type: "Near-Earth Asteroid"
+  }
+];
+
+// J2000.0 epoch: Jan 1, 2000, 12:00 UTC in ms
+const J2000 = Date.UTC(2000, 0, 1, 12, 0, 0, 0);
+
+function getCountdown(body) {
+  const now = Date.now();
+  const elapsedMs = now - J2000;
+  const periodMs = body.yearDays * 86400000;
+  const intoCurrentYear = elapsedMs % periodMs;
+  const remainingMs = periodMs - intoCurrentYear;
+  const progress = intoCurrentYear / periodMs;
+
+  const totalSec = Math.floor(remainingMs / 1000);
+  const days = Math.floor(totalSec / 86400);
+  const hours = Math.floor((totalSec % 86400) / 3600);
+  const mins = Math.floor((totalSec % 3600) / 60);
+  const secs = totalSec % 60;
+
+  const yearNum = Math.floor(elapsedMs / periodMs) + 1;
+
+  return { days, hours, mins, secs, progress, yearNum };
+}
+
+function pad(n) { return String(n).padStart(2, '0'); }
+
+function formatDays(d) {
+  if (d >= 365.25 * 1000) return (d / 365.25).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ',') + ' Earth yrs';
+  if (d >= 365.25) return (d / 365.25).toFixed(2) + ' Earth yrs';
+  return d.toFixed(2) + ' Earth days';
+}
+
+function makeCard(body, isExtras) {
+  const card = document.createElement('div');
+  card.className = 'card';
+  card.style.setProperty('--planet-color', body.color);
+  card.style.setProperty('--planet-glow', body.glow);
+  card.style.setProperty('--planet-bg', body.bg);
+  card.style.setProperty('--planet-accent', body.accent);
+  if (body.ringColor) card.style.setProperty('--ring-color', body.ringColor);
+
+  const orbClass = body.ring ? 'planet-orb has-ring' : 'planet-orb';
+
+  card.innerHTML = `
+    ${isExtras ? `<span class="extras-label">${body.type}</span>` : ''}
+    <div class="card-header">
+      <div class="${orbClass}"></div>
+      <div>
+        <div class="planet-name">${body.name}</div>
+        <div class="planet-year-length" id="fact-${body.name.replace(/[^a-z]/gi,'')}">${formatDays(body.yearDays)} / orbit</div>
+      </div>
+    </div>
+    <div class="countdown" id="cd-${body.name.replace(/[^a-z]/gi,'')}">
+      <div class="cd-unit"><span class="cd-num" id="d-${body.name.replace(/[^a-z]/gi,'')}">--</span><span class="cd-label">Days</span></div>
+      <div class="cd-unit"><span class="cd-num" id="h-${body.name.replace(/[^a-z]/gi,'')}">--</span><span class="cd-label">Hours</span></div>
+      <div class="cd-unit"><span class="cd-num" id="m-${body.name.replace(/[^a-z]/gi,'')}">--</span><span class="cd-label">Mins</span></div>
+      <div class="cd-unit"><span class="cd-num" id="s-${body.name.replace(/[^a-z]/gi,'')}">--</span><span class="cd-label">Secs</span></div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="p-${body.name.replace(/[^a-z]/gi,'')}" style="width:0%"></div></div>
+    <div class="next-year-label" id="yr-${body.name.replace(/[^a-z]/gi,'')}">Year — / —</div>
+  `;
+
+  return card;
+}
+
+function updateBody(body) {
+  const key = body.name.replace(/[^a-z]/gi, '');
+  const { days, hours, mins, secs, progress, yearNum } = getCountdown(body);
+
+  const dEl = document.getElementById('d-' + key);
+  const hEl = document.getElementById('h-' + key);
+  const mEl = document.getElementById('m-' + key);
+  const sEl = document.getElementById('s-' + key);
+  const pEl = document.getElementById('p-' + key);
+  const yrEl = document.getElementById('yr-' + key);
+
+  if (dEl) dEl.textContent = days.toLocaleString();
+  if (hEl) hEl.textContent = pad(hours);
+  if (mEl) mEl.textContent = pad(mins);
+  if (sEl) sEl.textContent = pad(secs);
+  if (pEl) pEl.style.width = (progress * 100).toFixed(4) + '%';
+  if (yrEl) yrEl.textContent = `Year ${yearNum.toLocaleString()} · ${(progress * 100).toFixed(3)}% complete`;
+}
+
+function updateEarthDate() {
+  const el = document.getElementById('earth-date');
+  if (el) {
+    const now = new Date();
+    el.textContent = now.toUTCString().replace('GMT', 'UTC');
+  }
+}
+
+// Build grids
+const pGrid = document.getElementById('planet-grid');
+const eGrid = document.getElementById('extras-grid');
+
+PLANETS.forEach(p => pGrid.appendChild(makeCard(p, false)));
+EXTRAS.forEach(p => eGrid.appendChild(makeCard(p, true)));
+
+// Tick
+function tick() {
+  PLANETS.forEach(updateBody);
+  EXTRAS.forEach(updateBody);
+  updateEarthDate();
+}
+
+tick();
+setInterval(tick, 1000);
+</script>
+</body>
+</html>
